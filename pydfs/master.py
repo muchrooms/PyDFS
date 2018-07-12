@@ -37,9 +37,9 @@ class MasterService(rpyc.Service):
     block_size = 0
     replication_factor = 0
 
-    def exposed_read(self,fname):
-      mapping = self.__class__.file_table[fname]
-      return mapping
+    #def exposed_read(self,fname):
+    #  mapping = self.__class__.file_table[fname]
+    #  return mapping
 
     def exposed_write(self,dest,size):
       if self.exists(dest):

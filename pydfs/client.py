@@ -27,7 +27,10 @@ def get(master,fname):
 
   for block in file_table:
     for m in [master.get_minions()[_] for _ in block[1]]:
-      data = read_from_minion(block[0],m)
+      try:
+        data = read_from_minion(block[0],m)
+      except:
+        continue
       if data:
         sys.stdout.write(data)
         break
