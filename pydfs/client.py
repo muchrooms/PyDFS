@@ -19,28 +19,30 @@ def read_from_minion(block_uuid,minion):
   minion = con.root.Minion()
   return minion.get(block_uuid)
 
-def get(master,fname):
+def get(master,fname,dest):
   file_table = master.get_file_table_entry(fname)
   if not file_table:
     print "404: file not found"
     return
 
-  for block in file_table:
-    for m in block[1]:
-      try:
-        data = read_from_minion(block[0],m)
-      except:
-        continue
-      if data:
-        sys.stdout.write(data)
-        break
-    else:
-        print "No blocks found. Possibly a corrupt file"
+  with open(dest, 'wb') as d:
+    for block in file_table:
+      for m in block[1]:
+        try:
+          data = read_from_minion(block[0],m)
+        except:
+          continue
+        if data:
+          #sys.stdout.write(data)
+          d.write(data)
+          break
+      else:
+          print "No blocks found. Possibly a corrupt file"
 
 def put(master,source,dest):
   size = os.path.getsize(source)
   blocks = master.write(dest,size)
-  with open(source) as f:
+  with open(source, 'rb') as f:
     for b in blocks:
       data = f.read(master.get_block_size())
       block_uuid=b[0]
@@ -53,7 +55,7 @@ def main(args):
   master=con.root.Master()
   
   if args[0] == "get":
-    get(master,args[1])
+    get(master,args[1],args[2])
   elif args[0] == "put":
     put(master,args[1],args[2])
   else:
