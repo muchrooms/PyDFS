@@ -20,6 +20,9 @@ def set_conf():
   conf.readfp(open('dfs.conf'))
   MasterService.exposed_Master.block_size = int(conf.get('master','block_size'))
   MasterService.exposed_Master.replication_factor = int(conf.get('master','replication_factor'))
+
+  MasterService.host = conf.get('master','host')
+  MasterService.port = int(conf.get('master','port'))
   #minions = {}
   #minions = conf.get('master','minions').split(',')
   #for m in minions:
@@ -30,6 +33,9 @@ def set_conf():
     MasterService.exposed_Master.file_table,MasterService.exposed_Master.block_mapping = pickle.load(open('fs.img','rb'))
 
 class MasterService(rpyc.Service):
+  host = "0.0.0.0"
+  port = 2131
+
   class exposed_Master():
     file_table = {}
     block_mapping = {}
@@ -93,5 +99,5 @@ class MasterService(rpyc.Service):
 if __name__ == "__main__":
   set_conf()
   signal.signal(signal.SIGINT,int_handler)
-  t = ThreadedServer(MasterService, port = 2131)
+  t = ThreadedServer(MasterService, hostname = MasterService.host, port = MasterService.port)
   t.start()

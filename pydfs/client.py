@@ -1,6 +1,7 @@
 import rpyc
 import sys
 import os
+import ConfigParser
 
 def send_to_minion(block_uuid,data,minions):
   print "sending: " + str(block_uuid) + str(minions)
@@ -51,7 +52,12 @@ def put(master,source,dest):
 
 
 def main(args):
-  con=rpyc.connect("localhost",port=2131)
+  conf=ConfigParser.ConfigParser()
+  conf.readfp(open('dfs.conf'))
+  host = conf.get('master','host')
+  port = int(conf.get('master','port'))
+
+  con=rpyc.connect(host,port)
   master=con.root.Master()
   
   if args[0] == "get":

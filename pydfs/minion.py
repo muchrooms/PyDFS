@@ -1,6 +1,7 @@
 import rpyc
 import uuid
 import os
+import ConfigParser
 
 from rpyc.utils.server import ThreadedServer
 
@@ -43,12 +44,17 @@ def int_handler(signal, frame):
   sys.exit(0)
 
 if __name__ == "__main__":
+  conf=ConfigParser.ConfigParser()
+  conf.readfp(open('dfs.conf'))
+  host = conf.get('master','host')
+  port = int(conf.get('master','port'))
+  con=rpyc.connect(host,port=port)
+
   import sys
   ip=sys.argv[1]
-  port=int(sys.argv[2])
+  p=int(sys.argv[2])
 
-  minion = (ip, port)
-  con=rpyc.connect("localhost",port=2131)
+  minion = (ip, p)
   master=con.root.Master()
   master.minion_enter(minion)
   
@@ -58,5 +64,5 @@ if __name__ == "__main__":
   DATA_DIR = DATA_DIR + sys.argv[1] + '/' + sys.argv[2] + '/'
   #if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
   if not os.path.isdir(DATA_DIR): os.makedirs(DATA_DIR)
-  t = ThreadedServer(MinionService, hostname=ip, port=port)
+  t = ThreadedServer(MinionService, hostname=ip, port=p)
   t.start()
