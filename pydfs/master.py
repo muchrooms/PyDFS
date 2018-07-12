@@ -20,10 +20,11 @@ def set_conf():
   conf.readfp(open('dfs.conf'))
   MasterService.exposed_Master.block_size = int(conf.get('master','block_size'))
   MasterService.exposed_Master.replication_factor = int(conf.get('master','replication_factor'))
-  minions = conf.get('master','minions').split(',')
-  for m in minions:
-    id,host,port=m.split(":")
-    MasterService.exposed_Master.minions[id]=(host,port)
+  #minions = {}
+  #minions = conf.get('master','minions').split(',')
+  #for m in minions:
+  #  id,host,port=m.split(":")
+  #  MasterService.exposed_Master.minions[id]=(host,port)
 
   if os.path.isfile('fs.img'):
     MasterService.exposed_Master.file_table,MasterService.exposed_Master.block_mapping = pickle.load(open('fs.img','rb'))
@@ -40,6 +41,14 @@ class MasterService(rpyc.Service):
     #def exposed_read(self,fname):
     #  mapping = self.__class__.file_table[fname]
     #  return mapping
+
+    def exposed_minion_enter(self, m):
+      print m, "enter our cluster"
+      MasterService.exposed_Master.minions[m] = None
+      
+    def exposed_minion_exit(self, m):
+      print m, "exit our cluster"
+      MasterService.exposed_Master.minions.pop(m)
 
     def exposed_write(self,dest,size):
       if self.exists(dest):

@@ -26,7 +26,7 @@ def get(master,fname):
     return
 
   for block in file_table:
-    for m in [master.get_minions()[_] for _ in block[1]]:
+    for m in block[1]:
       try:
         data = read_from_minion(block[0],m)
       except:
@@ -44,7 +44,7 @@ def put(master,source,dest):
     for b in blocks:
       data = f.read(master.get_block_size())
       block_uuid=b[0]
-      minions = [master.get_minions()[_] for _ in b[1]]
+      minions = b[1]
       send_to_minion(block_uuid,data,minions)
 
 

@@ -38,10 +38,25 @@ class MinionService(rpyc.Service):
     def delete_block(self,uuid):
       pass
 
+def int_handler(signal, frame):
+  master.minion_exit(minion)
+  sys.exit(0)
+
 if __name__ == "__main__":
   import sys
-  port=int(sys.argv[1])
+  ip=sys.argv[1]
+  port=int(sys.argv[2])
 
-  if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
-  t = ThreadedServer(MinionService, port = port)
+  minion = (ip, port)
+  con=rpyc.connect("localhost",port=2131)
+  master=con.root.Master()
+  master.minion_enter(minion)
+  
+  import signal
+  signal.signal(signal.SIGINT, int_handler)
+
+  DATA_DIR = DATA_DIR + sys.argv[1] + '/' + sys.argv[2]
+  #if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
+  if not os.path.isdir(DATA_DIR): os.makedirs(DATA_DIR)
+  t = ThreadedServer(MinionService, hostname=ip, port=port)
   t.start()
